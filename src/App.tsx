@@ -8,6 +8,7 @@ import { Dashboard } from './pages/Dashboard'
 import { FollowUp } from './pages/FollowUp'
 import { Leads } from './pages/Leads'
 import { Equipe } from './pages/Equipe'
+import { Perfil } from './pages/Perfil'
 import { LeadEditor } from './components/LeadEditor'
 import { LeadDetail } from './components/LeadDetail'
 import { Toast } from './components/Toast'
@@ -34,6 +35,7 @@ export default function App() {
             {page === 'followup' && <FollowUp />}
             {page === 'leads' && <Leads />}
             {page === 'equipe' && <Equipe />}
+            {page === 'perfil' && <Perfil />}
           </div>
         </main>
       </div>

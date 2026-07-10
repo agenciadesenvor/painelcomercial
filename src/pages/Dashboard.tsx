@@ -48,6 +48,7 @@ const PERIODS = [
 
 export function Dashboard() {
   const leads = useData((s) => s.leads)
+  const empresa = useData((s) => s.perfil.empresa) || BRAND.name
   const { openEditor, openDetail, setFiltro, setPage } = useUI()
   const [period, setPeriod] = useState<string>('30D')
 
@@ -130,7 +131,7 @@ export function Dashboard() {
                   <Logo size={44} />
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-display text-[15px] font-bold text-ink">{BRAND.name}</span>
+                      <span className="font-display text-[15px] font-bold text-ink">{empresa}</span>
                       <span className="text-xs font-medium text-ink-mute">({BRAND.short})</span>
                     </div>
                     <div className="mt-0.5 flex items-center gap-2">

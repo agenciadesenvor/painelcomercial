@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BRAND } from '../lib/brand'
 import { cn } from '../lib/utils'
+import { useData } from '../lib/store'
 
 /**
- * Logo da marca. Ordem: SVG → PNG → monograma.
- * Troque os arquivos em `public/logo.svg` / `public/logo.png`.
+ * Logo da marca. Ordem: logo do perfil (upload) → SVG → PNG → monograma.
  */
 export function Logo({
   size = 40,
@@ -15,15 +15,18 @@ export function Logo({
   rounded?: string
   className?: string
 }) {
-  const sources = [BRAND.logo, BRAND.logoFallback].filter(Boolean) as string[]
+  const perfilLogo = useData((s) => s.perfil.logo)
+  const empresa = useData((s) => s.perfil.empresa) || BRAND.name
+  const sources = [perfilLogo, BRAND.logo, BRAND.logoFallback].filter(Boolean) as string[]
   const [idx, setIdx] = useState(0)
+  useEffect(() => setIdx(0), [perfilLogo])
   const src = sources[idx]
 
   if (src) {
     return (
       <img
         src={src}
-        alt={BRAND.name}
+        alt={empresa}
         onError={() => setIdx((i) => i + 1)}
         className={cn('object-contain', rounded, className)}
         style={{ width: size, height: size }}
@@ -38,7 +41,7 @@ export function Logo({
       style={{ width: size, height: size }}
     >
       <span className="font-display font-bold leading-none text-white" style={{ fontSize: size * 0.46 }}>
-        {BRAND.name.charAt(0)}
+        {(empresa || 'D').charAt(0).toUpperCase()}
       </span>
     </span>
   )

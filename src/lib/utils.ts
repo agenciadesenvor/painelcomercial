@@ -153,3 +153,38 @@ export const UF_NOME: Record<string, string> = Object.fromEntries(
 export function uid(): string {
   return 'l_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4)
 }
+
+/**
+ * Lê um arquivo de imagem como data URL. Para imagens raster, redimensiona
+ * para caber em `maxSize` (px) — mantém SVG intacto. Usado no perfil (foto/logo).
+ */
+export function readImageFile(file: File, maxSize?: number): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onerror = () => reject(new Error('Falha ao ler o arquivo'))
+    reader.onload = () => {
+      const dataUrl = reader.result as string
+      if (!maxSize || file.type === 'image/svg+xml' || file.type === 'image/gif') {
+        resolve(dataUrl)
+        return
+      }
+      const img = new Image()
+      img.onload = () => {
+        const scale = Math.min(1, maxSize / Math.max(img.width, img.height))
+        if (scale >= 1) return resolve(dataUrl)
+        const w = Math.round(img.width * scale)
+        const h = Math.round(img.height * scale)
+        const canvas = document.createElement('canvas')
+        canvas.width = w
+        canvas.height = h
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return resolve(dataUrl)
+        ctx.drawImage(img, 0, 0, w, h)
+        resolve(canvas.toDataURL('image/jpeg', 0.85))
+      }
+      img.onerror = () => resolve(dataUrl)
+      img.src = dataUrl
+    }
+    reader.readAsDataURL(file)
+  })
+}

@@ -1,8 +1,9 @@
-import { LayoutDashboard, CalendarCheck, Contact, Users, Sparkles } from 'lucide-react'
-import { useUI, type Page } from '../lib/store'
+import { LayoutDashboard, CalendarCheck, Contact, Users, Sparkles, Settings } from 'lucide-react'
+import { useUI, useData, type Page } from '../lib/store'
 import { cn } from '../lib/utils'
 import { BRAND } from '../lib/brand'
 import { Logo } from './Logo'
+import { Avatar } from './Avatar'
 
 const NAV: { id: Page; label: string; icon: typeof LayoutDashboard; hint: string }[] = [
   { id: 'dashboard', label: 'Visão Geral', icon: LayoutDashboard, hint: 'KPIs e desempenho' },
@@ -12,11 +13,12 @@ const NAV: { id: Page; label: string; icon: typeof LayoutDashboard; hint: string
 ]
 
 function Brand() {
+  const empresa = useData((s) => s.perfil.empresa) || BRAND.name
   return (
     <div className="flex items-center gap-3 px-3">
       <Logo size={40} />
-      <div className="leading-tight">
-        <div className="font-display text-[15px] font-bold text-ink">{BRAND.name}</div>
+      <div className="min-w-0 leading-tight">
+        <div className="truncate font-display text-[15px] font-bold text-ink">{empresa}</div>
         <div className="text-[11px] font-medium text-ink-mute">{BRAND.tagline}</div>
       </div>
     </div>
@@ -25,6 +27,7 @@ function Brand() {
 
 export function Sidebar() {
   const { page, setPage } = useUI()
+  const perfil = useData((s) => s.perfil)
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] flex-col border-r border-hair bg-surface/70 backdrop-blur-xl lg:flex">
       <div className="flex h-[68px] items-center">
@@ -63,7 +66,22 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="border-t border-hair p-3">
+      <div className="space-y-2 border-t border-hair p-3">
+        <button
+          onClick={() => setPage('perfil')}
+          className={cn(
+            'flex w-full items-center gap-3 rounded-xl p-2.5 text-left transition-colors',
+            page === 'perfil' ? 'bg-white/[0.06] ring-1 ring-ember/25' : 'bg-white/[0.02] hover:bg-white/[0.05]',
+          )}
+        >
+          <Avatar name={perfil.nome} size="sm" src={perfil.foto} />
+          <div className="min-w-0 flex-1 leading-tight">
+            <div className="truncate text-xs font-semibold text-ink">{perfil.nome}</div>
+            <div className="text-[10px] text-ink-mute">Ver perfil</div>
+          </div>
+          <Settings size={15} className={cn('shrink-0', page === 'perfil' ? 'text-ember' : 'text-ink-mute')} />
+        </button>
+
         <div className="flex items-center gap-3 rounded-xl bg-white/[0.02] p-3">
           <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-ember/25 to-transparent ring-1 ring-ember/25">
             <Sparkles size={16} className="text-ember" />

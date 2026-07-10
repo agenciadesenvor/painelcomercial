@@ -1,7 +1,15 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Lead, NovoLead, StatusId, TrafegoEntry } from './types'
+import type { Lead, NovoLead, StatusId, TrafegoEntry, Perfil } from './types'
 import { VENDEDORES } from './types'
+
+const PERFIL_PADRAO: Perfil = {
+  nome: 'Elison Melo',
+  cargo: 'Gestor comercial',
+  foto: null,
+  empresa: 'Desenvor',
+  logo: null,
+}
 import { buildSeed } from './seed'
 import { uid } from './utils'
 
@@ -12,6 +20,9 @@ interface DataState {
   leads: Lead[]
   vendedores: string[]
   trafego: TrafegoEntry[]
+  perfil: Perfil
+  setPerfil: (patch: Partial<Perfil>) => void
+  resetPerfil: () => void
   addLead: (input: NovoLead) => string
   updateLead: (id: string, patch: Partial<Lead>, autor?: string) => void
   moveStatus: (id: string, status: StatusId, autor?: string) => void
@@ -32,6 +43,10 @@ export const useData = create<DataState>()(
         { id: 'tf_meta', canal: 'Meta Ads', investido: 12400, faturado: 268000, leads: 980, vendas: 190 },
         { id: 'tf_google', canal: 'Google Ads', investido: 6261.5, faturado: 152388, leads: 460, vendas: 112 },
       ],
+      perfil: PERFIL_PADRAO,
+
+      setPerfil: (patch) => set((s) => ({ perfil: { ...s.perfil, ...patch } })),
+      resetPerfil: () => set({ perfil: PERFIL_PADRAO }),
 
       addTrafego: (input) =>
         set((s) => ({ trafego: [...s.trafego, { ...input, id: uid() }] })),
@@ -105,7 +120,7 @@ export const useData = create<DataState>()(
 /* ────────────────────────────────────────────────────────────
    Estado de UI (não persistido)
    ──────────────────────────────────────────────────────────── */
-export type Page = 'dashboard' | 'followup' | 'leads' | 'equipe' | 'trafego'
+export type Page = 'dashboard' | 'followup' | 'leads' | 'equipe' | 'trafego' | 'perfil'
 
 export interface Filtros {
   search: string

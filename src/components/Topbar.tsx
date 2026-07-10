@@ -1,5 +1,5 @@
 import { Search, Plus, Bell, Command } from 'lucide-react'
-import { useUI } from '../lib/store'
+import { useUI, useData } from '../lib/store'
 import { Avatar } from './Avatar'
 import { Logo } from './Logo'
 
@@ -11,6 +11,8 @@ const HOJE = new Date().toLocaleDateString('pt-BR', {
 
 export function Topbar() {
   const { openEditor, setPage, setFiltro, filtros } = useUI()
+  const perfil = useData((s) => s.perfil)
+  const primeiroNome = perfil.nome.trim().split(/\s+/)[0] || 'você'
 
   return (
     <header className="sticky top-0 z-20 border-b border-hair bg-base/70 backdrop-blur-xl">
@@ -23,7 +25,7 @@ export function Topbar() {
         {/* Saudação */}
         <div className="hidden min-w-0 md:block">
           <div className="truncate font-display text-[15px] font-bold text-ink">
-            Olá, Elison <span className="text-ember">·</span> vamos vender hoje
+            Olá, {primeiroNome} <span className="text-ember">·</span> vamos vender hoje
           </div>
           <div className="text-xs capitalize text-ink-mute">{HOJE}</div>
         </div>
@@ -59,13 +61,17 @@ export function Topbar() {
           <span className="hidden sm:inline">Novo lead</span>
         </button>
 
-        <div className="hidden items-center gap-2.5 rounded-xl border border-hair bg-white/[0.02] py-1.5 pl-1.5 pr-3 sm:flex">
-          <Avatar name="Elison Melo" size="sm" />
-          <div className="leading-tight">
-            <div className="text-xs font-semibold text-ink">Elison Melo</div>
-            <div className="text-[10px] text-ink-mute">Gestor comercial</div>
+        <button
+          onClick={() => setPage('perfil')}
+          title="Perfil"
+          className="flex shrink-0 items-center gap-2.5 rounded-xl border border-hair bg-white/[0.02] p-1.5 transition-colors hover:border-white/20 sm:pr-3"
+        >
+          <Avatar name={perfil.nome} size="sm" src={perfil.foto} />
+          <div className="hidden text-left leading-tight sm:block">
+            <div className="text-xs font-semibold text-ink">{perfil.nome}</div>
+            <div className="text-[10px] text-ink-mute">{perfil.cargo}</div>
           </div>
-        </div>
+        </button>
       </div>
     </header>
   )

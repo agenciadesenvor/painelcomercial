@@ -90,6 +90,15 @@ export type NovoLead = Omit<
   'id' | 'criadoEm' | 'atualizadoEm' | 'historico'
 >
 
+/* ── Perfil / marca ── */
+export interface Perfil {
+  nome: string
+  cargo: string
+  foto: string | null // data URL
+  empresa: string
+  logo: string | null // data URL (sobrepõe a logo padrão)
+}
+
 /* ── Tráfego pago ── */
 export interface TrafegoEntry {
   id: string
