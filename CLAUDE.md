@@ -15,6 +15,12 @@ npm run build    # tsc -b && vite build  (rodar antes de commitar)
 **Deploy:** `git push origin main` → a Vercel publica sozinha (CI/CD já ligado,
 projeto `agencia-desenvor/painelcomercial`). Não precisa rodar a CLI da Vercel.
 
+**URL pública (a que se compartilha): https://painelcomercial-seven.vercel.app**
+— é o domínio de produção. As URLs geradas (`painelcomercial-agencia-desenvor.
+vercel.app`, `…-git-main-…`) caem no login da Vercel por causa da Deployment
+Protection — isso é proposital (protege previews), não desligar. O sufixo
+"-seven" existe porque `painelcomercial.vercel.app` pertence a outra conta.
+
 > ⚠️ Depois de mexer em `tailwind.config.js`, **reinicie o dev server**. Ele
 > mantém o config em cache e passa a acusar "class does not exist" em tokens
 > novos — mesmo com o `build` passando.
