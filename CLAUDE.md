@@ -91,6 +91,9 @@ src/
 
 - Estágios (`STATUS` em `types.ts`): Novo · Sem retorno · Recontato ·
   Negociando · **Venda concluída** · Perdido.
+- **O CTA de criação é "Nova venda"**, não "Novo lead" (Topbar, Dashboard,
+  Clientes + título/botão do `LeadEditor`). O estágio `novo` continua sendo só
+  **"Novo"** — chamá-lo de "Nova venda" conflitaria com "Venda concluída".
 - **A palavra "pipeline" foi banida da UI.** Valor de oportunidades abertas =
   **"Em aberto"** (`Kpis.valorEmAberto`, `VendedorAgg.emAberto`); estrutura/etapa
   = **"funil"**.
