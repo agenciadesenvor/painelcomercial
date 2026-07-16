@@ -1,4 +1,4 @@
-import type { Lead, StatusId } from './types'
+import type { Lead, StatusId, TrafegoLancamento } from './types'
 
 /* PRNG determinístico (mulberry32) — dados estáveis a cada geração */
 function mulberry32(seed: number) {
@@ -142,6 +142,8 @@ export function buildSeed(): Lead[] {
     const observacao = pick(OBS_POR_STATUS[status])
     const cliente = `${pick(PREFIXO)} ${pick(NOME)}`
     const telefone = `(${DDD[estado] ?? '85'}) 9${between(4000, 9999)}-${between(1000, 9999)}`
+    // A operação é puxada por anúncio: ~2/3 dos leads vêm de tráfego pago
+    const origemTrafego = rng() < 0.66
 
     leads.push({
       id: 'seed_' + i.toString(36).padStart(3, '0'),
@@ -157,6 +159,7 @@ export function buildSeed(): Lead[] {
       observacao,
       responsavel,
       proximoFollowUp,
+      origemTrafego,
       criadoEm,
       atualizadoEm,
       historico: [
@@ -169,4 +172,23 @@ export function buildSeed(): Lead[] {
   }
 
   return leads
+}
+
+/** Lançamentos de tráfego de demonstração: os 3 últimos meses (o atual incluso). */
+export function buildSeedLancamentos(): TrafegoLancamento[] {
+  const valores: [number, number][] = [
+    [6200, 1500], // há 2 meses
+    [6800, 1500], // mês passado
+    [7400, 1500], // mês atual
+  ]
+  const hoje = new Date()
+  return valores.map(([investido, honorarios], i) => {
+    const d = new Date(hoje.getFullYear(), hoje.getMonth() - (2 - i), 1)
+    return {
+      id: `seed_tf_${i}`,
+      mes: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
+      investido,
+      honorarios,
+    }
+  })
 }

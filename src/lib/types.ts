@@ -80,6 +80,9 @@ export interface Lead {
   observacao: string
   responsavel: string
   proximoFollowUp: string | null // ISO date
+  /** veio de anúncio pago — entra no cálculo de retorno do painel Tráfego.
+      Opcional: leads persistidos antes do campo não o têm (= false). */
+  origemTrafego?: boolean
   criadoEm: string // ISO
   atualizadoEm: string // ISO
   historico: EventoHistorico[]
@@ -99,21 +102,16 @@ export interface Perfil {
   logo: string | null // data URL (sobrepõe a logo padrão)
 }
 
-/* ── Tráfego pago ── */
-export interface TrafegoEntry {
+/* ── Tráfego pago ──
+   Só o gasto é manual (investido em mídia + honorários da agência, por mês).
+   O retorno vem do CRM: leads marcados `origemTrafego` em "Venda concluída". */
+export interface TrafegoLancamento {
   id: string
-  canal: string
+  /** mês de referência no formato 'YYYY-MM' */
+  mes: string
+  /** investido em mídia (R$) */
   investido: number
-  faturado: number
-  leads: number
-  vendas: number
+  /** honorários da agência (R$) */
+  honorarios: number
+  observacao?: string
 }
-
-export const CANAIS_TRAFEGO = [
-  'Meta Ads',
-  'Google Ads',
-  'TikTok Ads',
-  'YouTube Ads',
-  'LinkedIn Ads',
-  'Outros',
-] as const

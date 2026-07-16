@@ -1,4 +1,4 @@
-import type { Lead, StatusId, TrafegoEntry } from './types'
+import type { Lead, StatusId, TrafegoLancamento } from './types'
 import { FUNIL, STATUS_ORDER, STATUS } from './types'
 import type { Filtros } from './store'
 import { daysUntil } from './utils'
@@ -308,40 +308,86 @@ export function serieReceita(leads: Lead[], dias = 30): number[] {
   return daily.map((v) => (acc += v))
 }
 
-/* ── Tráfego pago ── */
-export interface TrafegoKpis {
-  faturado: number
-  investido: number
-  leads: number
-  vendas: number
+/* ── Tráfego pago ──
+   Gasto manual (lançamentos mensais: mídia + honorários) × retorno real do
+   funil (leads marcados `origemTrafego`). Convenções de mercado:
+   ROAS considera só a mídia; ROI e CAC consideram o investimento total. */
+export interface TrafegoResumo {
+  investido: number // mídia
+  honorarios: number // agência
+  investimentoTotal: number
+  retorno: number // receita dos clientes de tráfego em "Venda concluída"
+  lucro: number // retorno − investimento total
+  roas: number // retorno / mídia
+  roi: number // lucro / investimento total
+  cac: number // investimento total / vendas
+  custoLead: number // investimento total / leads
   ticket: number
-  cac: number
-  cLead: number
-  roas: number
+  leads: number // leads vindos de tráfego
+  vendas: number
   conversao: number
-  roi: number
-  lucro: number
-  receitaPorLead: number
+  emAberto: number // valor dos leads de tráfego ainda ativos no funil
 }
 
-export function computeTrafego(entries: TrafegoEntry[]): TrafegoKpis {
-  const faturado = entries.reduce((a, e) => a + e.faturado, 0)
-  const investido = entries.reduce((a, e) => a + e.investido, 0)
-  const leads = entries.reduce((a, e) => a + e.leads, 0)
-  const vendas = entries.reduce((a, e) => a + e.vendas, 0)
-  const lucro = faturado - investido
-  return {
-    faturado,
-    investido,
-    leads,
-    vendas,
-    ticket: vendas ? faturado / vendas : 0,
-    cac: vendas ? investido / vendas : 0,
-    cLead: leads ? investido / leads : 0,
-    roas: investido ? faturado / investido : 0,
-    conversao: leads ? (vendas / leads) * 100 : 0,
-    roi: investido ? lucro / investido : 0,
-    lucro,
-    receitaPorLead: leads ? faturado / leads : 0,
+export function computeTrafegoResumo(
+  leads: Lead[],
+  lancamentos: TrafegoLancamento[],
+): TrafegoResumo {
+  const investido = lancamentos.reduce((a, l) => a + l.investido, 0)
+  const honorarios = lancamentos.reduce((a, l) => a + l.honorarios, 0)
+  const investimentoTotal = investido + honorarios
+
+  let nLeads = 0,
+    vendas = 0,
+    retorno = 0,
+    emAberto = 0
+  for (const l of leads) {
+    if (!l.origemTrafego) continue
+    nLeads++
+    if (l.status === 'ganho') {
+      vendas++
+      retorno += l.valor
+    } else if (STATUS[l.status].ativo) {
+      emAberto += l.valor
+    }
   }
+
+  const lucro = retorno - investimentoTotal
+  return {
+    investido,
+    honorarios,
+    investimentoTotal,
+    retorno,
+    lucro,
+    roas: investido ? retorno / investido : 0,
+    roi: investimentoTotal ? lucro / investimentoTotal : 0,
+    cac: vendas ? investimentoTotal / vendas : 0,
+    custoLead: nLeads ? investimentoTotal / nLeads : 0,
+    ticket: vendas ? retorno / vendas : 0,
+    leads: nLeads,
+    vendas,
+    conversao: nLeads ? (vendas / nLeads) * 100 : 0,
+    emAberto,
+  }
+}
+
+export interface TrafegoMes {
+  mes: string // 'YYYY-MM'
+  investimento: number // mídia + honorários lançados no mês
+  retorno: number // vendas concluídas de tráfego no mês (por atualizadoEm)
+}
+
+/** Série mensal investimento × retorno (união dos meses com gasto ou venda). */
+export function trafegoPorMes(leads: Lead[], lancamentos: TrafegoLancamento[]): TrafegoMes[] {
+  const map = new Map<string, TrafegoMes>()
+  const bucket = (mes: string) => {
+    if (!map.has(mes)) map.set(mes, { mes, investimento: 0, retorno: 0 })
+    return map.get(mes)!
+  }
+  for (const l of lancamentos) bucket(l.mes).investimento += l.investido + l.honorarios
+  for (const l of leads) {
+    if (!l.origemTrafego || l.status !== 'ganho') continue
+    bucket(l.atualizadoEm.slice(0, 7)).retorno += l.valor
+  }
+  return [...map.values()].sort((a, b) => a.mes.localeCompare(b.mes))
 }

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { X, ChevronDown } from 'lucide-react'
+import { X, ChevronDown, Megaphone } from 'lucide-react'
 import { useData, useUI } from '../lib/store'
 import { CAMPANHAS, PRODUTOS, STATUS_ORDER, STATUS, type StatusId } from '../lib/types'
-import { UFS } from '../lib/utils'
+import { UFS, cn } from '../lib/utils'
 
 interface Form {
   cliente: string
@@ -17,6 +17,7 @@ interface Form {
   responsavel: string
   proximoFollowUp: string
   observacao: string
+  origemTrafego: boolean
 }
 
 const EMPTY: Form = {
@@ -32,6 +33,7 @@ const EMPTY: Form = {
   responsavel: '',
   proximoFollowUp: '',
   observacao: '',
+  origemTrafego: false,
 }
 
 function Field({ label, children, required }: { label: string; children: React.ReactNode; required?: boolean }) {
@@ -79,6 +81,7 @@ export function LeadEditor() {
         responsavel: editing.responsavel,
         proximoFollowUp: editing.proximoFollowUp ? editing.proximoFollowUp.slice(0, 10) : '',
         observacao: editing.observacao,
+        origemTrafego: !!editing.origemTrafego,
       })
     } else {
       setF({ ...EMPTY, numero: String(1000 + leads.length + 1), responsavel: vendedores[0] ?? '' })
@@ -116,6 +119,7 @@ export function LeadEditor() {
       responsavel: f.responsavel,
       proximoFollowUp: f.proximoFollowUp ? new Date(f.proximoFollowUp + 'T10:00:00').toISOString() : null,
       observacao: f.observacao.trim(),
+      origemTrafego: f.origemTrafego,
     }
     if (editing) {
       updateLead(editing.id, payload)
@@ -217,6 +221,49 @@ export function LeadEditor() {
           <Field label="Próximo follow-up">
             <input type="date" className="input" value={f.proximoFollowUp} onChange={(e) => set({ proximoFollowUp: e.target.value })} />
           </Field>
+
+          {/* Origem: cliente de tráfego pago */}
+          <div className="sm:col-span-2">
+            <button
+              type="button"
+              onClick={() => set({ origemTrafego: !f.origemTrafego })}
+              aria-pressed={f.origemTrafego}
+              className={cn(
+                'flex w-full items-center gap-3 rounded-xl border p-3.5 text-left transition-colors',
+                f.origemTrafego
+                  ? 'border-ember/45 bg-ember/10'
+                  : 'border-hair bg-overlay hover:border-hair-strong',
+              )}
+            >
+              <span
+                className={cn(
+                  'grid h-9 w-9 shrink-0 place-items-center rounded-lg transition-colors',
+                  f.origemTrafego ? 'bg-ember/20 text-ember' : 'bg-overlay-2 text-ink-mute',
+                )}
+              >
+                <Megaphone size={17} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold text-ink">Cliente de tráfego</span>
+                <span className="block text-xs text-ink-mute">
+                  Veio de anúncio pago — entra no cálculo de retorno do painel de Tráfego
+                </span>
+              </span>
+              <span
+                className={cn(
+                  'relative h-6 w-11 shrink-0 rounded-full transition-colors',
+                  f.origemTrafego ? 'bg-ember' : 'border border-hair bg-overlay-2',
+                )}
+              >
+                <span
+                  className={cn(
+                    'absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all',
+                    f.origemTrafego ? 'left-[22px]' : 'left-0.5',
+                  )}
+                />
+              </span>
+            </button>
+          </div>
 
           <div className="sm:col-span-2">
             <Field label="Observação">

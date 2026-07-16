@@ -54,6 +54,11 @@ export function LeadDetail() {
           </div>
           <div className="relative mt-4 flex items-center gap-3">
             <StatusBadge status={lead.status} />
+            {lead.origemTrafego && (
+              <span className="inline-flex items-center gap-1 rounded-md bg-ember/15 px-1.5 py-0.5 text-[10px] font-bold text-ember">
+                <Megaphone size={11} /> TRÁFEGO
+              </span>
+            )}
             <div className="ml-auto text-right">
               <div className="font-display text-xl font-bold text-ink tnum">{money(lead.valor)}</div>
               <div className="text-[10px] text-ink-mute">valor estimado</div>

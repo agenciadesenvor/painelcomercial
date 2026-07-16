@@ -44,7 +44,7 @@ function numBR(v: number): string {
 
 const COLUNAS = [
   'Nº', 'Cliente', 'Telefone', 'Cidade', 'UF', 'Estado', 'Campanha', 'Produto',
-  'Estágio', 'Valor (R$)', 'Vendedor', 'Próximo follow-up', 'Observação',
+  'Origem', 'Estágio', 'Valor (R$)', 'Vendedor', 'Próximo follow-up', 'Observação',
   'Criado em', 'Atualizado em',
 ]
 
@@ -60,6 +60,7 @@ export function leadsParaLinhas(leads: Lead[]): Array<Array<string | number | nu
       UF_NOME[l.estado] ?? l.estado,
       l.campanha,
       l.produto,
+      l.origemTrafego ? 'Tráfego' : 'Orgânico',
       STATUS[l.status].label,
       numBR(l.valor),
       l.responsavel,

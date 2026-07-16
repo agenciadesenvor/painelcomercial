@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import {
-  Search, X, ChevronDown, SlidersHorizontal, ArrowUpDown, Plus, Inbox, CalendarClock, Download,
+  Search, X, ChevronDown, SlidersHorizontal, ArrowUpDown, Plus, Inbox, CalendarClock, Download, Megaphone,
 } from 'lucide-react'
 import { useData, useUI } from '../lib/store'
 import { filterLeads } from '../lib/analytics'
@@ -235,7 +235,14 @@ function Row({ lead, onClick }: { lead: Lead; onClick: () => void }) {
   return (
     <tr onClick={onClick} className="cursor-pointer border-b border-hair/60 transition-colors last:border-0 hover:bg-overlay">
       <td className="px-4 py-3">
-        <div className="font-semibold text-ink">{lead.cliente}</div>
+        <div className="flex items-center gap-1.5 font-semibold text-ink">
+          {lead.cliente}
+          {lead.origemTrafego && (
+            <span className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded bg-ember/15 text-ember" title="Cliente de tráfego">
+              <Megaphone size={11} />
+            </span>
+          )}
+        </div>
         <div className="text-[11px] text-ink-mute">#{lead.numero} · {lead.produto}</div>
       </td>
       <td className="px-4 py-3">

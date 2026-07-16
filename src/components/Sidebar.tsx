@@ -1,4 +1,4 @@
-import { LayoutDashboard, CalendarCheck, Contact, Users, Sparkles } from 'lucide-react'
+import { LayoutDashboard, CalendarCheck, Contact, Users, Megaphone, Sparkles } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useUI, useData, type Page } from '@/lib/store'
 import { cn } from '@/lib/utils'
@@ -15,6 +15,7 @@ const NAV: { id: Page; label: string; icon: typeof LayoutDashboard }[] = [
   { id: 'dashboard', label: 'Visão Geral', icon: LayoutDashboard },
   { id: 'followup', label: 'Follow-up', icon: CalendarCheck },
   { id: 'leads', label: 'Clientes', icon: Contact },
+  { id: 'trafego', label: 'Tráfego', icon: Megaphone },
   { id: 'equipe', label: 'Equipe', icon: Users },
 ]
 

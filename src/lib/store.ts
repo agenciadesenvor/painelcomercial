@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Lead, NovoLead, StatusId, TrafegoEntry, Perfil } from './types'
+import type { Lead, NovoLead, StatusId, TrafegoLancamento, Perfil } from './types'
 import { VENDEDORES } from './types'
 
 const PERFIL_PADRAO: Perfil = {
@@ -10,7 +10,7 @@ const PERFIL_PADRAO: Perfil = {
   empresa: 'Desenvor',
   logo: null,
 }
-import { buildSeed } from './seed'
+import { buildSeed, buildSeedLancamentos } from './seed'
 import { uid } from './utils'
 
 /* ────────────────────────────────────────────────────────────
@@ -21,7 +21,8 @@ export type Tema = 'light' | 'dark'
 interface DataState {
   leads: Lead[]
   vendedores: string[]
-  trafego: TrafegoEntry[]
+  /** gasto mensal com tráfego (mídia + honorários) — entrada manual */
+  lancamentos: TrafegoLancamento[]
   perfil: Perfil
   tema: Tema
   setTema: (t: Tema) => void
@@ -35,9 +36,10 @@ interface DataState {
   addVendedor: (nome: string) => boolean
   renameVendedor: (antigo: string, novo: string) => boolean
   deleteVendedor: (nome: string, reatribuirPara?: string) => boolean
-  addTrafego: (input: Omit<TrafegoEntry, 'id'>) => void
-  updateTrafego: (id: string, patch: Partial<TrafegoEntry>) => void
-  deleteTrafego: (id: string) => void
+  /** false se já existe lançamento para aquele mês */
+  addLancamento: (input: Omit<TrafegoLancamento, 'id'>) => boolean
+  updateLancamento: (id: string, patch: Partial<TrafegoLancamento>) => boolean
+  deleteLancamento: (id: string) => void
   resetData: () => void
 }
 
@@ -46,10 +48,7 @@ export const useData = create<DataState>()(
     (set, get) => ({
       leads: buildSeed(),
       vendedores: [...VENDEDORES],
-      trafego: [
-        { id: 'tf_meta', canal: 'Meta Ads', investido: 12400, faturado: 268000, leads: 980, vendas: 190 },
-        { id: 'tf_google', canal: 'Google Ads', investido: 6261.5, faturado: 152388, leads: 460, vendas: 112 },
-      ],
+      lancamentos: buildSeedLancamentos(),
       perfil: PERFIL_PADRAO,
       tema: 'dark',
 
@@ -59,11 +58,28 @@ export const useData = create<DataState>()(
       setPerfil: (patch) => set((s) => ({ perfil: { ...s.perfil, ...patch } })),
       resetPerfil: () => set({ perfil: PERFIL_PADRAO }),
 
-      addTrafego: (input) =>
-        set((s) => ({ trafego: [...s.trafego, { ...input, id: uid() }] })),
-      updateTrafego: (id, patch) =>
-        set((s) => ({ trafego: s.trafego.map((t) => (t.id === id ? { ...t, ...patch } : t)) })),
-      deleteTrafego: (id) => set((s) => ({ trafego: s.trafego.filter((t) => t.id !== id) })),
+      // Um lançamento por mês de referência — duplicar seria contar o gasto 2x.
+      addLancamento: (input) => {
+        if (get().lancamentos.some((l) => l.mes === input.mes)) return false
+        set((s) => ({
+          lancamentos: [...s.lancamentos, { ...input, id: uid() }].sort((a, b) =>
+            a.mes.localeCompare(b.mes),
+          ),
+        }))
+        return true
+      },
+      updateLancamento: (id, patch) => {
+        const s = get()
+        if (patch.mes && s.lancamentos.some((l) => l.id !== id && l.mes === patch.mes)) return false
+        set((st) => ({
+          lancamentos: st.lancamentos
+            .map((l) => (l.id === id ? { ...l, ...patch } : l))
+            .sort((a, b) => a.mes.localeCompare(b.mes)),
+        }))
+        return true
+      },
+      deleteLancamento: (id) =>
+        set((s) => ({ lancamentos: s.lancamentos.filter((l) => l.id !== id) })),
 
       addVendedor: (nome) => {
         const n = nome.trim()
@@ -160,7 +176,7 @@ export const useData = create<DataState>()(
 
       deleteLead: (id) => set((s) => ({ leads: s.leads.filter((l) => l.id !== id) })),
 
-      resetData: () => set({ leads: buildSeed() }),
+      resetData: () => set({ leads: buildSeed(), lancamentos: buildSeedLancamentos() }),
     }),
     { name: 'clea-painel-v2' },
   ),

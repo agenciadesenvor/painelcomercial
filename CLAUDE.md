@@ -68,9 +68,9 @@ Em SVG/inline, use as vars: `var(--grid)`, `var(--map-empty)`, `var(--hair)`,
 ```
 src/
   lib/store.ts       Zustand + persist (chave 'clea-painel-v2'):
-                     leads, vendedores, trafego, perfil, tema  → useData
-                     page, filtros, modais, toast              → useUI
-  lib/types.ts       Lead, STATUS (estágios), Perfil, TrafegoEntry
+                     leads, vendedores, lancamentos, perfil, tema → useData
+                     page, filtros, modais, toast                 → useUI
+  lib/types.ts       Lead, STATUS (estágios), Perfil, TrafegoLancamento
   lib/analytics.ts   KPIs e agregações (puras, recebem leads[])
   lib/seed.ts        Dados de demonstração (PRNG determinístico)
   lib/brazil-geo.ts  Gerado: paths dos 27 estados (não editar à mão)
@@ -97,9 +97,13 @@ src/
 - **A palavra "pipeline" foi banida da UI.** Valor de oportunidades abertas =
   **"Em aberto"** (`Kpis.valorEmAberto`, `VendedorAgg.emAberto`); estrutura/etapa
   = **"funil"**.
-- Aba **Tráfego pausada**: o código está preservado (`pages/Trafego.tsx`,
-  `TrafegoEditor.tsx`, `store.trafego`, `computeTrafego`). Para reativar,
-  descomente o import + a rota em `App.tsx` e o item no NAV do `Sidebar.tsx`.
+- **Aba Tráfego (reativada em jul/2026, modelo novo):** só o GASTO é manual —
+  lançamentos mensais (`TrafegoLancamento`: mês `YYYY-MM`, investido em mídia,
+  honorários da agência; 1 por mês, `addLancamento` bloqueia duplicata). O
+  RETORNO vem do funil: leads com `origemTrafego: true` (chave "Cliente de
+  tráfego" no `LeadEditor`). ROAS = retorno/mídia; ROI e CAC usam o
+  investimento total (mídia + honorários). Cálculos em
+  `computeTrafegoResumo`/`trafegoPorMes` (analytics).
 - `MeshBanner.tsx` existe mas está sem uso (imagem de fundo removida a pedido).
 
 ## Estado atual / próximo passo

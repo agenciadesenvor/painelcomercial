@@ -3,9 +3,7 @@ import { useUI, useData } from './lib/store'
 import { Sidebar, BottomNav } from './components/Sidebar'
 import { Topbar } from './components/Topbar'
 import { Dashboard } from './pages/Dashboard'
-// Aba Tráfego pausada (código preservado). Para reativar: descomentar aqui,
-// a rota abaixo e o item no Sidebar (NAV). Ver src/pages/Trafego.tsx.
-// import { Trafego } from './pages/Trafego'
+import { Trafego } from './pages/Trafego'
 import { FollowUp } from './pages/FollowUp'
 import { Leads } from './pages/Leads'
 import { Equipe } from './pages/Equipe'
@@ -39,7 +37,7 @@ export default function App() {
         <main className="mx-auto w-full max-w-[1360px] px-4 pb-28 pt-5 sm:px-6 lg:pb-10">
           <div key={page} className="animate-fade-up">
             {page === 'dashboard' && <Dashboard />}
-            {/* {page === 'trafego' && <Trafego />} — aba Tráfego pausada */}
+            {page === 'trafego' && <Trafego />}
             {page === 'followup' && <FollowUp />}
             {page === 'leads' && <Leads />}
             {page === 'equipe' && <Equipe />}
