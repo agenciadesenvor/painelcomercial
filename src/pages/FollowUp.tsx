@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { GripVertical, ChevronDown, Plus, CalendarClock } from 'lucide-react'
+import { GripVertical, ChevronDown, Plus, CalendarClock, MessageCircle } from 'lucide-react'
 import { useData, useUI } from '../lib/store'
 import { STATUS, STATUS_ORDER, type StatusId, type Lead } from '../lib/types'
 import { cn, UF_NOME, money, moneyShort, daysUntil, formatDate } from '../lib/utils'
@@ -69,7 +69,14 @@ function FollowCard({
 
       <div className="mt-3 flex items-center justify-between border-t border-hair pt-2.5">
         <span className="font-display text-sm font-bold text-ink tnum">{money(lead.valor)}</span>
-        <Avatar name={lead.responsavel} size="xs" />
+        <div className="flex items-center gap-2">
+          {!!lead.interacoes?.length && (
+            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-ink-mute tnum" title={`${lead.interacoes.length} contato(s) registrado(s)`}>
+              <MessageCircle size={12} /> {lead.interacoes.length}
+            </span>
+          )}
+          <Avatar name={lead.responsavel} size="xs" />
+        </div>
       </div>
     </div>
   )

@@ -113,6 +113,14 @@ src/
   `computeTrafegoResumo`/`trafegoPorMes` (analytics), filtráveis por
   `PeriodoMes` (De/Até em 'YYYY-MM'; padrão da página = mês atual). Leads/em
   aberto contam pelo mês de criação; vendas/retorno pelo mês de fechamento.
+- **Atendimento no lead (Fase 0, jul/2026):** o painel do lead (`LeadDetail`)
+  tem abas **Conversa | Detalhes**. Conversa = `components/Conversa.tsx`, um
+  registro manual de contatos no formato de mensagem (`Interacao`: `canal`
+  whatsapp/ligacao/email/presencial/nota + `direcao` recebido/enviado/interno).
+  É registro interno (o cliente NÃO recebe) — a base visual do chat real que
+  virá com o WhatsApp+Supabase; quando vier, as mensagens caem nessa mesma
+  lista sem mudar a UI. Store: `addInteracao`/`deleteInteracao`. Contador no
+  card do Follow-up. WhatsApp real ainda depende de backend (ver roadmap).
 - `MeshBanner.tsx` existe mas está sem uso (imagem de fundo removida a pedido).
 
 ## Estado atual / próximo passo

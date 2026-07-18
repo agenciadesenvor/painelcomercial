@@ -1,8 +1,10 @@
-import { X, Pencil, Trash2, Phone, MapPin, Megaphone, Package, CalendarClock, ArrowRight } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { X, Pencil, Trash2, Phone, MapPin, Megaphone, Package, CalendarClock, ArrowRight, MessageCircle } from 'lucide-react'
 import { useData, useUI } from '../lib/store'
 import { STATUS, STATUS_ORDER, type StatusId } from '../lib/types'
 import { Avatar } from './Avatar'
 import { StatusBadge } from './StatusBadge'
+import { Conversa } from './Conversa'
 import { money, formatDateLong, timeAgoFull, UF_NOME, cn, daysUntil } from '../lib/utils'
 
 function InfoRow({ icon: Icon, label, value }: { icon: typeof Phone; label: string; value: React.ReactNode }) {
@@ -23,8 +25,16 @@ export function LeadDetail() {
   const { detailId, closeDetail, openEditor, notify } = useUI()
   const { leads, moveStatus, deleteLead } = useData()
   const lead = detailId ? leads.find((l) => l.id === detailId) : null
+  const [tab, setTab] = useState<'conversa' | 'detalhes'>('conversa')
+
+  // Toda vez que abre um lead, começa na conversa
+  useEffect(() => {
+    if (detailId) setTab('conversa')
+  }, [detailId])
 
   if (!lead) return null
+
+  const nContatos = lead.interacoes?.length ?? 0
 
   const waDigits = lead.telefone.replace(/\D/g, '')
   const followDays = daysUntil(lead.proximoFollowUp)
@@ -122,8 +132,36 @@ export function LeadDetail() {
             </div>
           </div>
 
+          {/* Abas: Conversa / Detalhes */}
+          <div className="mt-5 flex gap-1 rounded-xl border border-hair bg-overlay p-1">
+            {([['conversa', 'Conversa'], ['detalhes', 'Detalhes']] as const).map(([id, label]) => (
+              <button
+                key={id}
+                onClick={() => setTab(id)}
+                className={cn(
+                  'flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold transition-colors',
+                  tab === id ? 'bg-elevated text-ink shadow-sm ring-1 ring-hair' : 'text-ink-sub hover:text-ink',
+                )}
+              >
+                {id === 'conversa' && <MessageCircle size={13} />}
+                {label}
+                {id === 'conversa' && nContatos > 0 && (
+                  <span className="grid h-4 min-w-4 place-items-center rounded-full bg-ember/20 px-1 text-[10px] font-bold text-ember tnum">
+                    {nContatos}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {tab === 'conversa' ? (
+            <div className="mt-4">
+              <Conversa leadId={lead.id} />
+            </div>
+          ) : (
+            <>
           {/* Dados */}
-          <div className="mt-5 rounded-2xl border border-hair bg-overlay px-4">
+          <div className="mt-4 rounded-2xl border border-hair bg-overlay px-4">
             <InfoRow icon={Phone} label="Telefone" value={lead.telefone || '—'} />
             <div className="border-t border-hair" />
             <InfoRow icon={MapPin} label="Localização" value={`${lead.cidade || '—'} · ${UF_NOME[lead.estado]}`} />
@@ -187,6 +225,8 @@ export function LeadDetail() {
               ))}
             </div>
           </div>
+            </>
+          )}
         </div>
       </div>
     </div>

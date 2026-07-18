@@ -66,6 +66,31 @@ export interface EventoHistorico {
   nota?: string
 }
 
+/* ── Atendimento (Fase 0: registro manual · vira chat real com WhatsApp) ──
+   Formato de mensagem: canal + direção são exatamente os campos que uma
+   mensagem de verdade tem, então quando o WhatsApp entrar as mensagens
+   caem nesta mesma lista sem mudar a UI. */
+export type CanalContato = 'whatsapp' | 'ligacao' | 'email' | 'presencial' | 'nota'
+/** recebido = cliente→nós · enviado = nós→cliente · interno = nota/registro */
+export type DirecaoContato = 'recebido' | 'enviado' | 'interno'
+
+export interface Interacao {
+  id: string
+  data: string // ISO
+  autor: string // quem registrou (vendedor)
+  canal: CanalContato
+  direcao: DirecaoContato
+  texto: string
+}
+
+export const CANAL_META: Record<CanalContato, { label: string; icon: string }> = {
+  whatsapp: { label: 'WhatsApp', icon: 'whatsapp' },
+  ligacao: { label: 'Ligação', icon: 'phone' },
+  email: { label: 'E-mail', icon: 'mail' },
+  presencial: { label: 'Presencial', icon: 'store' },
+  nota: { label: 'Nota', icon: 'note' },
+}
+
 export interface Lead {
   id: string
   numero: string
@@ -83,6 +108,8 @@ export interface Lead {
   /** veio de anúncio pago — entra no cálculo de retorno do painel Tráfego.
       Opcional: leads persistidos antes do campo não o têm (= false). */
   origemTrafego?: boolean
+  /** registro de atendimento (Fase 0). Opcional: leads antigos não têm. */
+  interacoes?: Interacao[]
   criadoEm: string // ISO
   atualizadoEm: string // ISO
   historico: EventoHistorico[]

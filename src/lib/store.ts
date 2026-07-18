@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Lead, NovoLead, StatusId, TrafegoLancamento, Perfil } from './types'
+import type { Lead, NovoLead, StatusId, TrafegoLancamento, Perfil, Interacao } from './types'
 import { VENDEDORES } from './types'
 
 const PERFIL_PADRAO: Perfil = {
@@ -33,6 +33,8 @@ interface DataState {
   updateLead: (id: string, patch: Partial<Lead>, autor?: string) => void
   moveStatus: (id: string, status: StatusId, autor?: string) => void
   deleteLead: (id: string) => void
+  addInteracao: (leadId: string, input: Omit<Interacao, 'id' | 'data'>) => void
+  deleteInteracao: (leadId: string, interacaoId: string) => void
   addVendedor: (nome: string) => boolean
   renameVendedor: (antigo: string, novo: string) => boolean
   deleteVendedor: (nome: string, reatribuirPara?: string) => boolean
@@ -175,6 +177,27 @@ export const useData = create<DataState>()(
         })),
 
       deleteLead: (id) => set((s) => ({ leads: s.leads.filter((l) => l.id !== id) })),
+
+      // Registrar um contato move o lead pro topo do "atendido recentemente"
+      // via atualizadoEm — mesma semântica que uma mensagem nova teria.
+      addInteracao: (leadId, input) =>
+        set((s) => ({
+          leads: s.leads.map((l) => {
+            if (l.id !== leadId) return l
+            const now = new Date().toISOString()
+            const nova: Interacao = { ...input, id: uid(), data: now }
+            return { ...l, interacoes: [...(l.interacoes ?? []), nova], atualizadoEm: now }
+          }),
+        })),
+
+      deleteInteracao: (leadId, interacaoId) =>
+        set((s) => ({
+          leads: s.leads.map((l) =>
+            l.id === leadId
+              ? { ...l, interacoes: (l.interacoes ?? []).filter((i) => i.id !== interacaoId) }
+              : l,
+          ),
+        })),
 
       resetData: () => set({ leads: buildSeed(), lancamentos: buildSeedLancamentos() }),
     }),

@@ -1,4 +1,4 @@
-import type { Lead, StatusId, TrafegoLancamento } from './types'
+import type { Lead, StatusId, TrafegoLancamento, Interacao, CanalContato, DirecaoContato } from './types'
 
 /* PRNG determinístico (mulberry32) — dados estáveis a cada geração */
 function mulberry32(seed: number) {
@@ -82,6 +82,59 @@ const VALOR_FAIXA: Record<string, [number, number]> = {
   'Linha Básica': [800, 3500],
 }
 
+/* Conversas de demonstração — no formato de mensagem (canal + direção),
+   pra abrir o lead já com um histórico de atendimento crível. */
+const ABERTURAS = [
+  'Oi, vi o anúncio de vocês. Vocês entregam pra minha cidade?',
+  'Bom dia! Queria saber os preços da linha de vocês.',
+  'Vi o vídeo no Instagram, como faço pra comprar?',
+  'Olá, ainda tem o combo que apareceu na propaganda?',
+  'Oi, um amigo indicou vocês. Como funciona o atacado?',
+]
+const RESPOSTAS = [
+  'Oi! Que bom o contato 😊 Vou te mandar o catálogo com os valores.',
+  'Bom dia! Entregamos sim. Posso te passar as condições?',
+  'Claro! Temos ótimas opções pra você. Qual volume você costuma comprar?',
+  'Oi! Tem sim. Vou montar uma proposta e te envio ainda hoje.',
+]
+const NOTAS_INTERNAS: [CanalContato, string][] = [
+  ['ligacao', 'Liguei, pediu pra retornar na sexta'],
+  ['ligacao', 'Não atendeu, vou tentar amanhã de manhã'],
+  ['email', 'Enviei a proposta fechada por e-mail'],
+  ['nota', 'Cliente comparando com concorrente, sensível a preço'],
+  ['presencial', 'Passou na loja, levou amostra da Linha Plus'],
+]
+
+function buildInteracoes(
+  status: StatusId,
+  responsavel: string,
+  criadoEm: string,
+  atualizadoEm: string,
+): Interacao[] {
+  if (status === 'novo' && rng() < 0.7) return [] // recém-chegados costumam estar vazios
+  const inicio = new Date(criadoEm).getTime()
+  const fim = new Date(atualizadoEm).getTime()
+  const span = Math.max(fim - inicio, 3_600_000)
+  let t = inicio + span * 0.05
+  const passo = () => {
+    t += span * (0.15 + rng() * 0.3)
+    return new Date(Math.min(t, fim)).toISOString()
+  }
+  const push = (arr: Interacao[], canal: CanalContato, direcao: DirecaoContato, texto: string) =>
+    arr.push({ id: 'seed_i_' + arr.length + '_' + Math.floor(t).toString(36), data: passo(), autor: responsavel, canal, direcao, texto })
+
+  const out: Interacao[] = []
+  push(out, 'whatsapp', 'recebido', pick(ABERTURAS))
+  push(out, 'whatsapp', 'enviado', pick(RESPOSTAS))
+  const extras = status === 'ganho' || status === 'negociando' ? between(1, 3) : between(0, 2)
+  for (let i = 0; i < extras; i++) {
+    const [canal, texto] = pick(NOTAS_INTERNAS)
+    push(out, canal, 'interno', texto)
+  }
+  if (status === 'ganho') push(out, 'whatsapp', 'recebido', 'Fechado! Pode mandar o pedido 🎉')
+  return out
+}
+
 function isoDaysAgo(days: number): string {
   const d = new Date()
   d.setDate(d.getDate() - days)
@@ -160,6 +213,7 @@ export function buildSeed(): Lead[] {
       responsavel,
       proximoFollowUp,
       origemTrafego,
+      interacoes: buildInteracoes(status, responsavel, criadoEm, atualizadoEm),
       criadoEm,
       atualizadoEm,
       historico: [
