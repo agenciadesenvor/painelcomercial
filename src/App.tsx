@@ -1,5 +1,9 @@
 import { useEffect } from 'react'
+import { Loader2 } from 'lucide-react'
 import { useUI, useData } from './lib/store'
+import { useSession } from './lib/auth'
+import { supabaseConfigurado } from './lib/supabase'
+import { Login } from './pages/Login'
 import { Sidebar, BottomNav } from './components/Sidebar'
 import { Topbar } from './components/Topbar'
 import { Dashboard } from './pages/Dashboard'
@@ -15,11 +19,24 @@ import { Toast } from './components/Toast'
 export default function App() {
   const page = useUI((s) => s.page)
   const tema = useData((s) => s.tema)
+  const { session, carregando } = useSession()
 
   // Aplica o tema no <html> — o Tailwind está em darkMode: 'class'
   useEffect(() => {
     document.documentElement.classList.toggle('dark', tema === 'dark')
   }, [tema])
+
+  // Com Supabase ligado, o painel exige login. Sem .env, segue no localStorage.
+  if (supabaseConfigurado) {
+    if (carregando) {
+      return (
+        <div className="grid min-h-dvh place-items-center">
+          <Loader2 size={26} className="animate-spin text-ember" />
+        </div>
+      )
+    }
+    if (!session) return <Login />
+  }
 
   return (
     <div className="min-h-dvh">

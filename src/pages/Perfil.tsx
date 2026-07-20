@@ -1,7 +1,9 @@
 import { useRef } from 'react'
-import { UserRound, Building2, ImageUp, Trash2, RotateCcw, CheckCircle2 } from 'lucide-react'
+import { UserRound, Building2, ImageUp, Trash2, RotateCcw, CheckCircle2, LogOut } from 'lucide-react'
 import { useData, useUI } from '../lib/store'
 import { readImageFile } from '../lib/utils'
+import { supabaseConfigurado } from '../lib/supabase'
+import { sair } from '../lib/auth'
 import { PageTitle, CardHead } from '../components/Kit'
 import { Avatar } from '../components/Avatar'
 import { Logo } from '../components/Logo'
@@ -114,7 +116,7 @@ export function Perfil() {
       </div>
 
       {/* Rodapé */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <span className="inline-flex items-center gap-1.5 text-xs text-positive">
           <CheckCircle2 size={14} /> Alterações salvas automaticamente
         </span>
@@ -127,6 +129,14 @@ export function Perfil() {
         >
           <RotateCcw size={13} /> Restaurar padrão
         </button>
+        {supabaseConfigurado && (
+          <button
+            onClick={() => sair()}
+            className="btn-ghost py-2 text-xs hover:!border-danger/40 hover:!text-danger"
+          >
+            <LogOut size={13} /> Sair
+          </button>
+        )}
       </div>
     </div>
   )
