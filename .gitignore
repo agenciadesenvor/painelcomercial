@@ -7,6 +7,11 @@ dist-ssr
 *.local
 *.tsbuildinfo
 
+# env (a anon key é pública, mas mantemos fora do git; ver .env.example)
+.env
+.env.*
+!.env.example
+
 # vercel
 .vercel
 
