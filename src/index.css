@@ -39,6 +39,9 @@
 
     --glow-1: rgba(253, 78, 23, 0.08);
     --glow-2: rgba(255, 122, 33, 0.05);
+
+    /* Cor opaca que cobre o azul do autofill do Chrome (precisa ser sólida) */
+    --autofill: #f4f6fa;
   }
 
   .dark {
@@ -70,6 +73,8 @@
 
     --glow-1: rgba(253, 78, 23, 0.14);
     --glow-2: rgba(255, 122, 33, 0.07);
+
+    --autofill: #072445;
   }
 
   * {
@@ -102,6 +107,22 @@
   ::selection {
     background: rgba(253, 78, 23, 0.32);
     color: #fff;
+  }
+
+  /* Preenchimento automático do Chrome: ele pinta um retângulo azul opaco por
+     cima do campo, ignorando o tema. Cobrimos com um box-shadow interno na cor
+     do tema (precisa ser opaca) e forçamos a cor do texto. O arredondamento
+     vem do próprio input — por isso todo input tem seu border-radius. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-text-fill-color: rgb(var(--ink));
+    -webkit-box-shadow: 0 0 0 1000px var(--autofill) inset;
+    box-shadow: 0 0 0 1000px var(--autofill) inset;
+    caret-color: rgb(var(--ink));
   }
 
   /* Scrollbars */

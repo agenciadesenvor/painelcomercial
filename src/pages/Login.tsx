@@ -34,7 +34,9 @@ function GlassField({
         <input
           {...props}
           className={cn(
-            'w-full bg-transparent py-3.5 pl-11 pr-4 text-sm text-ink placeholder:text-ink-mute focus:outline-none',
+            // rounded-2xl no próprio input: sem isso o autofill do Chrome pinta
+            // um retângulo de cantos retos que "vaza" nas pontas da borda.
+            'w-full rounded-2xl bg-transparent py-3.5 pl-11 pr-4 text-sm text-ink placeholder:text-ink-mute focus:outline-none',
             className,
           )}
         />
