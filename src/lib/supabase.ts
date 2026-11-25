@@ -11,8 +11,8 @@ import { createClient } from '@supabase/supabase-js'
  * As variáveis de ambiente (.env local ou Vercel) têm precedência, então dá
  * para apontar para outro projeto sem mexer no código.
  */
-const URL_PADRAO = 'https://nbpuarytkrktyrunpiuy.supabase.co'
-const ANON_PADRAO = 'sb_publishable_TcxHpg8TDn6fPtCbCaxOZQ_F4On4PsO'
+const URL_PADRAO = 'https://uhzikiuqjzympgxksdhr.supabase.co'
+const ANON_PADRAO = 'sb_publishable_NNMh8HFWeuFHvlLvojmdaA_ImGggOPe'
 
 const url = (import.meta.env.VITE_SUPABASE_URL as string | undefined) || URL_PADRAO
 const anonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) || ANON_PADRAO
